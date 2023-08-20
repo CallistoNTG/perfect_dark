@@ -889,118 +889,121 @@ void explosionInflictDamage(struct prop *expprop)
 					}
 				}
 			} else if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
-				f32 xdist = prop->pos.f[0] - expprop->pos.f[0];
-				f32 ydist = prop->pos.f[1] - expprop->pos.f[1];
-				f32 zdist = prop->pos.f[2] - expprop->pos.f[2];
-				f32 radius;
-				f32 ymax;
-				f32 ymin;
-				struct coord spcc;
-				struct coord spc0;
-
-				bool candamage = false;
-
-				if (prop->type == PROPTYPE_CHR);
-
-				if (xdist <= damageradius && xdist >= -damageradius
-						&& ydist <= damageradius && ydist >= -damageradius
-						&& zdist <= damageradius && zdist >= -damageradius) {
-					propGetBbox(prop, &radius, &ymax, &ymin);
-
-					radius -= 20.0f;
-
-					if (radius <= 0.0f) {
-						radius = 0.0f;
+				if (!prop->hidden || defined(PLATFORM_N64)) { //Bugfix to prevent game activating hidden NPCs with explosions. If we are on N64, keep old behavior. Maybe we need a BUGFIX toggle?
+					f32 xdist = prop->pos.f[0] - expprop->pos.f[0];
+					f32 ydist = prop->pos.f[1] - expprop->pos.f[1];
+					f32 zdist = prop->pos.f[2] - expprop->pos.f[2];
+					f32 radius;
+					f32 ymax;
+					f32 ymin;
+					struct coord spcc;
+					struct coord spc0;
+	
+					bool candamage = false;
+	
+					if (prop->type == PROPTYPE_CHR);
+	
+					if (xdist <= damageradius && xdist >= -damageradius
+							&& ydist <= damageradius && ydist >= -damageradius
+							&& zdist <= damageradius && zdist >= -damageradius) {
+						propGetBbox(prop, &radius, &ymax, &ymin);
+	
+						radius -= 20.0f;
+	
+						if (radius <= 0.0f) {
+							radius = 0.0f;
+						}
+	
+						spcc.f[0] = prop->pos.f[0] - radius;
+						spcc.f[1] = ymin;
+						spcc.f[2] = prop->pos.f[2] - radius;
+	
+						spc0.f[0] = prop->pos.f[0] + radius;
+						spc0.f[1] = ymax;
+						spc0.f[2] = prop->pos.f[2] + radius;
+	
+						if (explosionOverlapsProp(exp, prop, &spcc, &spc0)) {
+							candamage = true;
+						}
 					}
-
-					spcc.f[0] = prop->pos.f[0] - radius;
-					spcc.f[1] = ymin;
-					spcc.f[2] = prop->pos.f[2] - radius;
-
-					spc0.f[0] = prop->pos.f[0] + radius;
-					spc0.f[1] = ymax;
-					spc0.f[2] = prop->pos.f[2] + radius;
-
-					if (explosionOverlapsProp(exp, prop, &spcc, &spc0)) {
-						candamage = true;
-					}
-				}
-
-				if (candamage) {
-					struct prop *ownerprop = NULL;
-					f32 xfrac = xdist / damageradius;
-					f32 yfrac = ydist / damageradius;
-					f32 zfrac = zdist / damageradius;
-					struct coord spa0 = {0, 0, 0};
-					struct chrdata *chr = prop->chr;
-					f32 minfrac;
-
-					if (xfrac < 0.0f) {
-						xfrac = -xfrac;
-					}
-
-					if (yfrac < 0.0f) {
-						yfrac = -yfrac;
-					}
-
-					if (zfrac < 0.0f) {
-						zfrac = -zfrac;
-					}
-
-					xfrac = 1.0f - xfrac;
-					yfrac = 1.0f - yfrac;
-					zfrac = 1.0f - zfrac;
-
-					minfrac = xfrac;
-
-					if (yfrac < minfrac) {
-						minfrac = yfrac;
-					}
-
-					if (zfrac < minfrac) {
-						minfrac = zfrac;
-					}
-
-					minfrac *= minfrac;
-					minfrac = minfrac * type->damage * 8.0f;
-
-					if (isfirstframe) {
-						if (xdist != 0.0f || zdist != 0.0f) {
-							f32 dist = sqrtf(xdist * xdist + zdist * zdist);
-
-							if (dist > 0.0f) {
-								xdist *= 1.0f / dist;
-								zdist *= 1.0f / dist;
-
-								spa0.x = xdist;
-								spa0.y = 0.0f;
-								spa0.z = zdist;
+	
+					if (candamage) {
+						struct prop *ownerprop = NULL;
+						f32 xfrac = xdist / damageradius;
+						f32 yfrac = ydist / damageradius;
+						f32 zfrac = zdist / damageradius;
+						struct coord spa0 = {0, 0, 0};
+						struct chrdata *chr = prop->chr;
+						f32 minfrac;
+	
+						if (xfrac < 0.0f) {
+							xfrac = -xfrac;
+						}
+	
+						if (yfrac < 0.0f) {
+							yfrac = -yfrac;
+						}
+	
+						if (zfrac < 0.0f) {
+							zfrac = -zfrac;
+						}
+	
+						xfrac = 1.0f - xfrac;
+						yfrac = 1.0f - yfrac;
+						zfrac = 1.0f - zfrac;
+	
+						minfrac = xfrac;
+	
+						if (yfrac < minfrac) {
+							minfrac = yfrac;
+						}
+	
+						if (zfrac < minfrac) {
+							minfrac = zfrac;
+						}
+	
+						minfrac *= minfrac;
+						minfrac = minfrac * type->damage * 8.0f;
+	
+						if (isfirstframe) {
+							if (xdist != 0.0f || zdist != 0.0f) {
+								f32 dist = sqrtf(xdist * xdist + zdist * zdist);
+	
+								if (dist > 0.0f) {
+									xdist *= 1.0f / dist;
+									zdist *= 1.0f / dist;
+	
+									spa0.x = xdist;
+									spa0.y = 0.0f;
+									spa0.z = zdist;
+								}
 							}
+						} else {
+							minfrac *= 0.05f * g_Vars.lvupdate60freal;
 						}
-					} else {
-						minfrac *= 0.05f * g_Vars.lvupdate60freal;
-					}
-
-					if (g_Vars.normmplayerisrunning) {
-						struct chrdata *ownerchr = mpGetChrFromPlayerIndex(exp->owner);
-
-						if (ownerchr) {
-							ownerprop = ownerchr->prop;
+	
+						if (g_Vars.normmplayerisrunning) {
+							struct chrdata *ownerchr = mpGetChrFromPlayerIndex(exp->owner);
+	
+							if (ownerchr) {
+								ownerprop = ownerchr->prop;
+							}
+						} else if (exp->owner == g_Vars.bondplayernum) {
+							ownerprop = g_Vars.bond->prop;
+						} else if (g_Vars.coopplayernum >= 0 && exp->owner == g_Vars.coopplayernum) {
+							ownerprop = g_Vars.coop->prop;
+						} else if (g_Vars.antiplayernum >= 0 && exp->owner == g_Vars.antiplayernum) {
+							ownerprop = g_Vars.anti->prop;
 						}
-					} else if (exp->owner == g_Vars.bondplayernum) {
-						ownerprop = g_Vars.bond->prop;
-					} else if (g_Vars.coopplayernum >= 0 && exp->owner == g_Vars.coopplayernum) {
-						ownerprop = g_Vars.coop->prop;
-					} else if (g_Vars.antiplayernum >= 0 && exp->owner == g_Vars.antiplayernum) {
-						ownerprop = g_Vars.anti->prop;
-					}
-
-					chrDamageByExplosion(chr, minfrac, &spa0, ownerprop, &expprop->pos);
-
-					if (prop->type == PROPTYPE_CHR && !isfirstframe) {
-						chrDisfigure(chr, &expprop->pos, damageradius);
-					}
+	
+						chrDamageByExplosion(chr, minfrac, &spa0, ownerprop, &expprop->pos);
+	
+						if (prop->type == PROPTYPE_CHR && !isfirstframe) {
+							chrDisfigure(chr, &expprop->pos, damageradius);
+						}
+					}	
 				}
+
 			}
 		}
 
