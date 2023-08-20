@@ -41,28 +41,4 @@ jobs:
           name: pd-i686-windows
           path: bin/
           retention-days: 0
-
-  build-i686-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-dev:i386 zlib1g-dev:i386
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Build pd.exe
-        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2
-      - name: Prepare artifact for packaging
-        run: |
-          mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/pd
-          touch bin/data/put_your_rom_here.txt
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: pd-i686-linux
-          path: bin/
-          retention-days: 0
       
