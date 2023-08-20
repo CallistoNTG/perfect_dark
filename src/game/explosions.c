@@ -888,8 +888,11 @@ void explosionInflictDamage(struct prop *expprop)
 						}
 					}
 				}
+#ifndef PLATFORM_N64 // Bugfix to prevent game activating hidden NPCs with explosions. If we are on N64, keep old behavior. Maybe we need a BUGFIX toggle?
+			} else if ((prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) && !prop->hidden) {
+#else
 			} else if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
-				if (!prop->hidden || defined(PLATFORM_N64)) { //Bugfix to prevent game activating hidden NPCs with explosions. If we are on N64, keep old behavior. Maybe we need a BUGFIX toggle?
+#endif
 					f32 xdist = prop->pos.f[0] - expprop->pos.f[0];
 					f32 ydist = prop->pos.f[1] - expprop->pos.f[1];
 					f32 zdist = prop->pos.f[2] - expprop->pos.f[2];
