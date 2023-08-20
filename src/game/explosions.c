@@ -1005,8 +1005,6 @@ void explosionInflictDamage(struct prop *expprop)
 							chrDisfigure(chr, &expprop->pos, damageradius);
 						}
 					}	
-				}
-
 			}
 		}
 
